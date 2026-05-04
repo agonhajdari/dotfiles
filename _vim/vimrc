@@ -1,0 +1,81 @@
+call plug#begin()
+Plug 'Konfekt/vim-formatprgs'
+Plug 'machakann/vim-highlightedyank'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-dispatch'
+Plug 'tpope/vim-eunuch'
+Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-sensible'
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-unimpaired'
+Plug 'tpope/vim-vinegar'
+call plug#end()
+
+set background=dark
+set clipboard=unnamed
+set hlsearch
+set noswapfile
+set nobackup
+set nowritebackup
+set autowrite
+set autoread
+set termguicolors
+set list
+set ignorecase
+set wildignorecase
+set tabstop=2 softtabstop=2 shiftwidth=2 expandtab
+let &g:listchars = "tab:\u21e5\u00b7,trail:\u2423,extends:\u21c9,precedes:\u21c7,nbsp:\u00b7"
+let &g:fillchars = "vert:\u250b,fold:\u00b7"
+colorscheme wildcharm
+
+if executable('rg')
+  set grepprg=rg\ --vimgrep\ --no-heading
+  set grepformat^=%f:%l:%c:%m
+endif
+
+nnoremap \b :b *
+nnoremap \e :e **/*
+nnoremap \f :find *
+nnoremap \F :find <C-R>=fnameescape(expand('%:p:h')).'/*'<CR>
+nnoremap \g :Grep<Space>
+nnoremap \G :LGrep<Space>
+nnoremap \l :Explore<CR>
+nnoremap \t :tag *
+nnoremap mt :Start ctags --exclude=dist-newstyle -R<CR>
+
+set path-=/usr/include
+for dir in [
+      \ 'app', 'assets',
+      \ 'components', 'composables', 'content',
+      \ 'layouts', 'lib',
+      \ 'middleware', 'modules',
+      \ 'pages', 'plugins', 'public',
+      \ 'scripts', 'server', 'src', 'ssl', 'static', 'store', 'styles', 'storyblok',
+      \ 'test', 'types',
+      \ 'utils',
+      \ ]
+  execute 'set path+=' . dir . '/**'
+endfor
+
+function! Grep(...)
+  return system(join([&grepprg] + [expandcmd(join(a:000, ' '))], ' '))
+endfunction
+command! -nargs=+ -complete=file_in_path -bar Grep  cgetexpr Grep(<f-args>)
+command! -nargs=+ -complete=file_in_path -bar LGrep lgetexpr Grep(<f-args>)
+augroup quickfix
+  autocmd!
+  autocmd QuickFixCmdPost cgetexpr nested if !empty(getqflist()) | cwindow | cc 1 | endif
+  autocmd QuickFixCmdPost lgetexpr nested if !empty(getloclist(0)) | lwindow | ll 1 | endif
+augroup END
+
+augroup RestoreCursor
+  autocmd!
+  autocmd BufReadPost *
+    \ let line = line("'\"")
+    \ | if line >= 1 && line <= line("$") && &filetype !~# 'commit'
+    \      && index(['xxd', 'gitrebase'], &filetype) == -1
+    \      && !&diff
+    \ |   execute "normal! g`\""
+    \ | endif
+augroup END
