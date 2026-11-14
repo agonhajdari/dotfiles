@@ -1,4 +1,10 @@
-call plug#begin()
+set nocompatible
+set encoding=utf-8
+
+" Find the bundled autoloader even when sourced through a Windows _vimrc.
+let s:config_dir = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+let &runtimepath = escape(s:config_dir, ',') . ',' . &runtimepath
+call plug#begin(s:config_dir . '/plugged')
 Plug 'Konfekt/vim-formatprgs'
 Plug 'machakann/vim-highlightedyank'
 Plug 'tpope/vim-commentary'
@@ -13,22 +19,34 @@ Plug 'tpope/vim-vinegar'
 call plug#end()
 
 set background=dark
-set clipboard=unnamed
+if has('clipboard')
+  set clipboard=unnamed
+endif
 set hlsearch
 set noswapfile
 set nobackup
 set nowritebackup
 set autowrite
 set autoread
-set termguicolors
+if exists('+termguicolors')
+  set termguicolors
+endif
 set list
 set ignorecase
 set wildignorecase
 set tabstop=2 softtabstop=2 shiftwidth=2 expandtab
 let &g:listchars = "tab:\u21e5\u00b7,trail:\u2423,extends:\u21c9,precedes:\u21c7,nbsp:\u00b7"
 let &g:fillchars = "vert:\u250b,fold:\u00b7"
-colorscheme wildcharm
+try
+  colorscheme wildcharm
+catch /^Vim\%((\a\+)\)\=:E185/
+  colorscheme default
+endtry
 
+" Use the Windows installer download when ripgrep is not already on PATH.
+if has('win32') && !executable('rg') && filereadable(s:config_dir . '/bin/rg.exe')
+  let $PATH = s:config_dir . '/bin;' . $PATH
+endif
 if executable('rg')
   set grepprg=rg\ --vimgrep\ --no-heading
   set grepformat^=%f:%l:%c:%m
