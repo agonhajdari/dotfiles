@@ -1,0 +1,64 @@
+# Dart definitions for Universal Ctags (requires the pcre2 feature).
+# Declaration-based patterns for Dart 3, including Dart 3.13 constructors.
+# The type/modifiers and declaration name must be on the same line.
+# Inferred-return function parameter lists may span lines.
+# Functions include methods and constructors; variables include fields and locals.
+--langdef=Dart
+--map-Dart=+.dart
+
+--kinddef-Dart=c,class,classes
+--kinddef-Dart=m,mixin,mixins
+--kinddef-Dart=e,enum,enums
+--kinddef-Dart=x,extension,extensions
+--kinddef-Dart=t,typedef,type aliases
+--kinddef-Dart=f,function,functions and constructors
+--kinddef-Dart=p,property,getters and setters
+--kinddef-Dart=o,operator,operators
+--kinddef-Dart=v,variable,variables and fields
+
+# Types, including Dart class modifiers and extension types.
+--regex-Dart=/^[\t ]*(?:(?:abstract|base|final|interface|sealed|mixin)[\t ]+)*class[\t ]+(?:const[\t ]+)?([A-Za-z_$][A-Za-z0-9_$]*)/\1/c/{pcre2}{exclusive}
+--regex-Dart=/^[\t ]*(?:base[\t ]+)?mixin[\t ]+([A-Za-z_$][A-Za-z0-9_$]*)/\1/m/{pcre2}{exclusive}
+--regex-Dart=/^[\t ]*enum[\t ]+(?:const[\t ]+)?([A-Za-z_$][A-Za-z0-9_$]*)/\1/e/{pcre2}{exclusive}
+--regex-Dart=/^[\t ]*extension[\t ]+(?:type[\t ]+(?:const[\t ]+)?)?(?!on\b)([A-Za-z_$][A-Za-z0-9_$]*)/\1/x/{pcre2}{exclusive}
+--regex-Dart=/^[\t ]*typedef[\t ]+([A-Za-z_$][A-Za-z0-9_$]*)(?:[\t ]*<[^;=]*>)?[\t ]*=/\1/t/{pcre2}{exclusive}
+# PCRE2 subroutines A/P/T below balance generic arguments, records and
+# function types; the first capture is always the symbol name.
+# Legacy function typedefs.
+--regex-Dart=/^[\t ]*typedef[\t ]+(?:(?&T)[\t ]+)?([A-Za-z_$][A-Za-z0-9_$]*)[\t ]*(?&A)?[\t ]*\((?(DEFINE)(?<A><(?:[^<>\r\n]++|(?&A))*>)(?<P>\((?:[^()\r\n]++|(?&P))*\))(?<T>(?:[A-Za-z_$][A-Za-z0-9_$.]*(?:[\t ]*(?&A))?|(?&P))\??(?:[\t ]+Function[\t ]*(?&A)?[\t ]*(?&P)\??)*))/\1/t/{pcre2}{exclusive}
+
+# Accessors may return records, nullable types, or functions.
+--regex-Dart=/^[\t ]*(?:(?:external|static|abstract|covariant)[\t ]+)*(?:(?&T)[\t ]+)?(?:get|set)[\t ]+([A-Za-z_$][A-Za-z0-9_$]*)[\t ]*(?=\(|=>|\{|;|$)(?(DEFINE)(?<A><(?:[^<>\r\n]++|(?&A))*>)(?<P>\((?:[^()\r\n]++|(?&P))*\))(?<T>(?:[A-Za-z_$][A-Za-z0-9_$.]*(?:[\t ]*(?&A))?|(?&P))\??(?:[\t ]+Function[\t ]*(?&A)?[\t ]*(?&P)\??)*))/\1/p/{pcre2}{exclusive}
+
+# Operators are tagged by their symbol, including [], []= and >>>.
+--regex-Dart=/^[\t ]*(?:external[\t ]+)?(?:(?&T)[\t ]+)?operator[\t ]*(\[\]=?|>>>|>>|<<|<=|>=|==|~\/|[-+*\/%~^&|<>])[\t ]*\((?(DEFINE)(?<A><(?:[^<>\r\n]++|(?&A))*>)(?<P>\((?:[^()\r\n]++|(?&P))*\))(?<T>(?:[A-Za-z_$][A-Za-z0-9_$.]*(?:[\t ]*(?&A))?|(?&P))\??(?:[\t ]+Function[\t ]*(?&A)?[\t ]*(?&P)\??)*))/\1/o/{pcre2}{exclusive}
+
+# Dart 3.13 concise constructors. Unnamed ones are called new/factory;
+# named ones use the declared name. Traditional const/factory constructors
+# retain Class or Class.name. Stop at '(' to support multiline parameters.
+--regex-Dart=/^[\t ]*(?:(?:external|const)[\t ]+)*(?:new|factory)[\t ]+([A-Za-z_$][A-Za-z0-9_$]*)[\t ]*\(/\1/f/{pcre2}{exclusive}
+--regex-Dart=/^[\t ]*(?:(?:external|const)[\t ]+)*((?:new|factory))[\t ]*\(/\1/f/{pcre2}{exclusive}
+--regex-Dart=/^[\t ]*(?:external[\t ]+)?(?:const(?:[\t ]+factory)?|factory)[\t ]+([A-Za-z_$][A-Za-z0-9_$]*(?:\.[A-Za-z_$][A-Za-z0-9_$]*)?)[\t ]*\(/\1/f/{pcre2}{exclusive}
+
+# Typed functions and methods; exclude expression/control-flow keywords.
+--regex-Dart=/^[\t ]*(?!(?:return|throw|new|const|factory|final|var|late|await|yield|else|case|if|for|while|switch|catch|assert)\b)(?:(?:external|static|abstract)[\t ]+)*(?&T)[\t ]+(?!Function\b)([A-Za-z_$][A-Za-z0-9_$]*)[\t ]*(?&A)?[\t ]*\((?(DEFINE)(?<A><(?:[^<>\r\n]++|(?&A))*>)(?<P>\((?:[^()\r\n]++|(?&P))*\))(?<T>(?:[A-Za-z_$][A-Za-z0-9_$.]*(?:[\t ]*(?&A))?|(?&P))\??(?:[\t ]+Function[\t ]*(?&A)?[\t ]*(?&P)\??)*))/\1/f/{pcre2}{exclusive}
+
+# Inferred-return declarations need a body or initializer, distinguishing
+# them from calls and enum values. Balanced parameters can span lines.
+# Traditional non-const bodyless constructors remain ambiguous with calls.
+--mline-regex-Dart=/(?m)^[\t ]*(?!(?:if|for|while|switch|catch|assert|super|this|return|throw|await|yield|new|const|factory|final|var|late)\b)([A-Za-z_$][A-Za-z0-9_$]*(?:\.[A-Za-z_$][A-Za-z0-9_$]*)?)[\t ]*(?:<[^;=()]*>)?[\t ]*(?<P>\((?:[^()\x22\x27]++|\x22(?:\\.|[^\x22\\])*\x22|\x27(?:\\.|[^\x27\\])*\x27|(?&P))*\))\s*(?:(?:async\*?|sync\*)\s*)?(?=\{|=>|:|=(?!=))/\1/f/{pcre2}{mgroup=1}
+
+# Variables/fields, including record and callback types. First name only
+# for comma-separated declarations. Patterns bind locals but aren't parsed.
+--regex-Dart=/^[\t ]*(?:(?:static|late|external|covariant)[\t ]+)*(?:var|final|const)[\t ]+([A-Za-z_$][A-Za-z0-9_$]*)[\t ]*(?==|;|,|$)/\1/v/{pcre2}{exclusive}
+--regex-Dart=/^[\t ]*(?!(?:return|throw|new|await|yield|import|export|part|library|break|continue|case)\b)(?:(?:static|late|final|const|external|covariant)[\t ]+)*(?&T)[\t ]+([A-Za-z_$][A-Za-z0-9_$]*)[\t ]*(?==|;)(?(DEFINE)(?<A><(?:[^<>\r\n]++|(?&A))*>)(?<P>\((?:[^()\r\n]++|(?&P))*\))(?<T>(?:[A-Za-z_$][A-Za-z0-9_$.]*(?:[\t ]*(?&A))?|(?&P))\??(?:[\t ]+Function[\t ]*(?&A)?[\t ]*(?&P)\??)*))/\1/v/{pcre2}{exclusive}
+
+# Limits: no scopes, enum-value tags, destructuring bindings, inline primary
+# constructor fields/representation getters, or full comment/string lexing.
+# Put annotations on their own lines. Record labels and parameters aren't tags.
+# References:
+# https://dart.dev/language/primary-constructors
+# https://dart.dev/language/constructors
+# https://dart.dev/language/records
+# https://dart.dev/language/extension-types
+# https://dart.dev/language/methods

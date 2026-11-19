@@ -18,6 +18,10 @@ Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-vinegar'
 call plug#end()
 
+let g:dispatch_compilers = {
+      \ 'npm run lint': 'eslint',
+      \ }
+
 set background=dark
 if has('clipboard')
   set clipboard=unnamed
@@ -42,9 +46,10 @@ try
 catch /^Vim\%((\a\+)\)\=:E185/
   colorscheme default
 endtry
+let g:netrw_dirhistmax = 0
 
-" Use the Windows installer download when ripgrep is not already on PATH.
-if has('win32') && !executable('rg') && filereadable(s:config_dir . '/bin/rg.exe')
+" Make the bundled Windows tools available to Vim and :Start.
+if has('win32') && isdirectory(s:config_dir . '/bin')
   let $PATH = s:config_dir . '/bin;' . $PATH
 endif
 if executable('rg')
@@ -60,7 +65,7 @@ nnoremap \g :Grep<Space>
 nnoremap \G :LGrep<Space>
 nnoremap \l :Explore<CR>
 nnoremap \t :tag *
-nnoremap mt :Start ctags --exclude=dist-newstyle -R<CR>
+nnoremap mt :Start ctags -R<CR>
 
 set path-=/usr/include
 for dir in [
