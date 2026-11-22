@@ -56,6 +56,11 @@ if executable('rg')
   set grepprg=rg\ --vimgrep\ --no-heading
   set grepformat^=%f:%l:%c:%m
 endif
+set belloff=all
+if has('gui_running')
+    set guifont=JetBrainsMono-Regular:h16
+    set guioptions-=mTrRlLb
+endif
 
 nnoremap \b :b *
 nnoremap \e :e **/*
