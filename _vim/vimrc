@@ -5,6 +5,7 @@ set encoding=utf-8
 let s:config_dir = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 let &runtimepath = escape(s:config_dir, ',') . ',' . &runtimepath
 call plug#begin(s:config_dir . '/plugged')
+Plug 'bronson/vim-visual-star-search'
 Plug 'Konfekt/vim-formatprgs'
 Plug 'machakann/vim-highlightedyank'
 Plug 'tpope/vim-commentary'
